@@ -31,5 +31,3 @@ https://api.ratesapi.io/api/latest?base=USD
 https://api.ratesapi.io/api/latest?base=EUR
 https://api.ratesapi.io/api/latest?base=GBP
 ```
-
-## Transaction fails randomly. User can see that his/her transction history
