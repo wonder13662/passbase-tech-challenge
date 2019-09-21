@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import utils from "../utils";
+import { Jumbotron, Container, Row, Col, Button, Form } from "react-bootstrap";
 import { Redirect, Link } from "react-router-dom";
 
 class SignUp extends React.Component {
@@ -79,42 +80,64 @@ class SignUp extends React.Component {
     }
 
     return (
-      <form action="/api/signup" method="post">
-        <div>
-          <label>
-            Name:
-            <input
-              type="text"
-              value={this.state.name}
-              onChange={this.handleOnChangeName}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            E-mail:
-            <input
-              type="email"
-              value={this.state.email}
-              onChange={this.handleOnChangeEmail}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            Password:
-            <input
-              type="password"
-              value={this.state.password}
-              onChange={this.handleOnChangePassword}
-            />
-          </label>
-        </div>
-        <div className="button" onClick={this.handleOnSubmit}>
-          <button type="submit">Submit</button>
-        </div>
-        <Link to="/">Log in</Link>
-      </form>
+      <Container>
+        <Row>
+          <Col>&nbsp;</Col>
+        </Row>
+        <Row>
+          <Col>&nbsp;</Col>
+          <Col xs={5}>
+            <Jumbotron>
+              <Form>
+                <h3>Sign up</h3>
+                <Form.Group controlId="formName">
+                  <Form.Label>Email address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Would you tell me your name?"
+                    value={this.state.name}
+                    onChange={this.handleOnChangeName}
+                  />
+                  <Form.Text className="text-muted">
+                    We'll never share your email with anyone else.
+                  </Form.Text>
+                </Form.Group>
+
+                <Form.Group controlId="formBasicEmail">
+                  <Form.Label>Email address</Form.Label>
+                  <Form.Control
+                    type="email"
+                    placeholder="Enter email"
+                    value={this.state.email}
+                    onChange={this.handleOnChangeEmail}
+                  />
+                  <Form.Text className="text-muted">
+                    We'll never share your email with anyone else.
+                  </Form.Text>
+                </Form.Group>
+
+                <Form.Group controlId="formBasicPassword">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="Password"
+                    value={this.state.password}
+                    onChange={this.handleOnChangePassword}
+                  />
+                </Form.Group>
+                <Button variant="primary" onClick={this.handleOnSubmit}>
+                  Submit
+                </Button>
+                <div>
+                  <Link to="/">Back to Log in</Link>
+                </div>
+              </Form>
+            </Jumbotron>
+          </Col>
+          <Col>&nbsp;</Col>
+        </Row>
+        <Row></Row>
+      </Container>
     );
   }
 }

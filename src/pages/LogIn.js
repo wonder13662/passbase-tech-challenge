@@ -1,7 +1,8 @@
 import React from "react";
 import axios from "axios";
-import utils from "../utils";
 import { Redirect, Link } from "react-router-dom";
+import { Jumbotron, Container, Row, Col, Button, Form } from "react-bootstrap";
+import utils from "../utils";
 
 class LogIn extends React.Component {
   constructor(props) {
@@ -60,32 +61,53 @@ class LogIn extends React.Component {
     }
 
     return (
-      <form action="/api/login" method="post">
-        <div>
-          <label>
-            E-mail:
-            <input
-              type="email"
-              value={this.state.email}
-              onChange={this.handleOnChangeEmail}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            Password:
-            <input
-              type="password"
-              value={this.state.password}
-              onChange={this.handleOnChangePassword}
-            />
-          </label>
-        </div>
-        <div className="button" onClick={this.handleOnSubmit}>
-          <button type="submit">Submit</button>
-        </div>
-        <Link to="/signup/">Don't you have account? Create new one</Link>
-      </form>
+      <Container>
+        <Row>
+          <Col>&nbsp;</Col>
+        </Row>
+        <Row>
+          <Col>&nbsp;</Col>
+          <Col xs={5}>
+            <Jumbotron>
+              <Form>
+                <h3>Log in</h3>
+                <Form.Group controlId="formBasicEmail">
+                  <Form.Label>Email address</Form.Label>
+                  <Form.Control
+                    type="email"
+                    placeholder="Enter email"
+                    value={this.state.email}
+                    onChange={this.handleOnChangeEmail}
+                  />
+                  <Form.Text className="text-muted">
+                    We'll never share your email with anyone else.
+                  </Form.Text>
+                </Form.Group>
+
+                <Form.Group controlId="formBasicPassword">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    placeholder="Password"
+                    value={this.state.password}
+                    onChange={this.handleOnChangePassword}
+                  />
+                </Form.Group>
+                <Button variant="primary" onClick={this.handleOnSubmit}>
+                  Submit
+                </Button>
+                <div>
+                  <Link to="/signup/">
+                    Do you need an account? Create new one
+                  </Link>
+                </div>
+              </Form>
+            </Jumbotron>
+          </Col>
+          <Col>&nbsp;</Col>
+        </Row>
+        <Row></Row>
+      </Container>
     );
   }
 }
