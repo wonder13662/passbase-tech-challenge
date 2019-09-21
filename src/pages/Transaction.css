@@ -1,0 +1,20 @@
+.receiver-box {
+  width: 400px;
+  padding: 10px 10px;
+}
+
+.sender-currency-box {
+  width: 1028px;
+  padding: 10px 10px;
+}
+
+.sender-currency-box > table > tbody > tr > td {
+  width: 25%;
+}
+.sender-currency-box > table > tbody > tr > td > button {
+  width: 200px;
+}
+
+.info-box-r {
+  float: right;
+}

@@ -1,0 +1,22 @@
+.currency-rate-table-container {
+  width: 400px;
+  padding: 10px 10px;
+}
+
+.balance-table-container {
+  width: 400px;
+  padding: 10px 10px;
+}
+
+.transaction-table-container {
+  width: 1200px;
+  padding: 10px 10px;
+}
+
+.info-box-r {
+  float: right;
+}
+
+.row-fail-transaction {
+  color: red;
+}
