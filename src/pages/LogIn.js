@@ -10,7 +10,7 @@ class LogIn extends React.Component {
     this.state = {
       email: "",
       password: "",
-      isLoggedIn: false
+      isLoggedIn: !!sessionStorage.getItem("userid")
     };
 
     this.handleOnChangeEmail = this.handleOnChangeEmail.bind(this);
@@ -45,16 +45,13 @@ class LogIn extends React.Component {
       })
       .then(response => {
         if (response.status === 200 && response.data.success) {
-          console.log(response);
           sessionStorage.setItem("userid", response.data.userid);
-          // TODO Redirect to Overview page
           this.setState({ isLoggedIn: true });
         } else {
           alert("Email or password is wrong. Please try again.");
         }
       })
       .catch(error => {
-        console.log(error);
         utils.alertError();
       });
   }

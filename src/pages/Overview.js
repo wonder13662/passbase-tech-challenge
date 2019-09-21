@@ -1,9 +1,12 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 
 class Overview extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      isLoggedIn: !!sessionStorage.getItem("userid")
+    };
     this.handleOnLogOut = this.handleOnLogOut.bind(this);
   }
 
@@ -12,9 +15,13 @@ class Overview extends React.Component {
   }
 
   render() {
+    if (!this.state.isLoggedIn) {
+      return <Redirect to="/" />;
+    }
+
     return (
       <div>
-        <Link to="/transaction">Transaction</Link>
+        <Link to="/transaction">Go to Transaction</Link>
         <br />
         <Link to="/" onClick={this.handleOnLogOut}>
           Log out
