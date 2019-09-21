@@ -1,22 +1,10 @@
 import React from "react";
+import LogIn from "./pages/LogIn";
+import SignUp from "./pages/SignUp";
+import Overview from "./pages/Overview";
+import Transaction from "./pages/Transaction";
 import "./App.css";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-
-function LogIn() {
-  return <h2>LogIn</h2>;
-}
-
-function SignUp() {
-  return <h2>SignUp</h2>;
-}
-
-function Overview() {
-  return <h2>Overview</h2>;
-}
-
-function Transaction() {
-  return <h2>Transaction</h2>;
-}
 
 function AppRouter() {
   return (
