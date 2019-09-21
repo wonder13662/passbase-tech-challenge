@@ -46,7 +46,7 @@ class SignUp extends React.Component {
       .then(response => {
         if (response.status === 200) {
           alert("Your account has been successfully registerd!");
-          localStorage.setItem("userid", response.data.userid);
+          sessionStorage.setItem("userid", response.data.userid);
           this.setState({ isSignedUp: true });
         } else {
           utils.alertError();

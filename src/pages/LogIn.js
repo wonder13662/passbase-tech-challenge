@@ -46,7 +46,7 @@ class LogIn extends React.Component {
       .then(response => {
         if (response.status === 200 && response.data.success) {
           console.log(response);
-          localStorage.setItem("userid", response.data.userid);
+          sessionStorage.setItem("userid", response.data.userid);
           // TODO Redirect to Overview page
           this.setState({ isLoggedIn: true });
         } else {
