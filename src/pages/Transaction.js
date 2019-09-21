@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 class Transaction extends React.Component {
   constructor(props) {
@@ -6,7 +7,11 @@ class Transaction extends React.Component {
   }
 
   render() {
-    return <div>Transaction</div>;
+    return (
+      <div>
+        <Link to="/">Log out</Link>
+      </div>
+    );
   }
 }
 

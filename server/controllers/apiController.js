@@ -1,6 +1,8 @@
 const Users = require("../models/userModel");
 const Transactions = require("../models/transactionModel");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcryptjs");
+const Const = require("../../src/const");
 
 module.exports = function(app) {
   app.use(bodyParser.json());
@@ -23,6 +25,28 @@ module.exports = function(app) {
     });
   });
 
+  app.post("/api/login", function(req, res) {
+    console.log("req.body.password:", req.body.password);
+
+    // 1. Fetch the user by email
+    Users.findOne(
+      {
+        email_address: req.body.email_address
+      },
+      function(err, user) {
+        if (err) throw err;
+
+        // 2. Compare password by bcryptjs
+        const isIdentical = bcrypt.compareSync(
+          req.body.password,
+          user.password
+        );
+
+        res.send(Object.assign({}, { success: isIdentical, userid: user.id }));
+      }
+    );
+  });
+
   app.post("/api/user", function(req, res) {
     const data = {
       name: req.body.name,
@@ -40,6 +64,19 @@ module.exports = function(app) {
       const newUser = Users(data);
       newUser.save(function(err) {
         if (err) throw err;
+
+        // Add 1000 USD Transaction
+        const data = {
+          sender: "",
+          receiver: newUser.id,
+          source_currency: Const.CURRENCY.USD,
+          target_currency: Const.CURRENCY.USD,
+          amount: req.body.amount,
+          exchange_rate: req.body.exchange_rate,
+          created_at: req.body.created_at,
+          updated_at: req.body.updated_at
+        };
+
         res.send("Success");
       });
     }
@@ -72,6 +109,13 @@ module.exports = function(app) {
     });
   });
 
+  function addTransaction(req, res, data) {
+    Transactions.findByIdAndUpdate(req.body.id, data, function(err, todo) {
+      if (err) throw err;
+      res.send("Success");
+    });
+  }
+
   app.post("/api/transaction", function(req, res) {
     const data = {
       sender: req.body.sender,
@@ -85,11 +129,7 @@ module.exports = function(app) {
     };
 
     if (req.body.id) {
-      Transactions.findByIdAndUpdate(req.body.id, data, function(err, todo) {
-        if (err) throw err;
-
-        res.send("Success");
-      });
+      addTransaction(data);
     } else {
       const newTransaction = Transactions(data);
       newTransaction.save(function(err) {

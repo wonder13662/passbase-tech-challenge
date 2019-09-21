@@ -10,23 +10,6 @@ function AppRouter() {
   return (
     <Router>
       <div>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">LogIn</Link>
-            </li>
-            <li>
-              <Link to="/signup/">SignUp</Link>
-            </li>
-            <li>
-              <Link to="/overview/">Overview</Link>
-            </li>
-            <li>
-              <Link to="/transaction/">Transaction</Link>
-            </li>
-          </ul>
-        </nav>
-
         <Route path="/" exact component={LogIn} />
         <Route path="/signup/" component={SignUp} />
         <Route path="/overview/" component={Overview} />

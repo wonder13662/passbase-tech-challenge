@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 class Overview extends React.Component {
   constructor(props) {
@@ -6,7 +7,11 @@ class Overview extends React.Component {
   }
 
   render() {
-    return <div>Overview</div>;
+    return (
+      <div>
+        <Link to="/">Log out</Link>
+      </div>
+    );
   }
 }
 
