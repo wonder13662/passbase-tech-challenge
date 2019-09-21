@@ -9,9 +9,10 @@ var transactionSchema = new Schema(
     sender_name: String,
     receiver_id: String,
     receiver_name: String,
-    source_currency: String,
-    target_currency: String,
-    amount: Number,
+    sender_currency: String,
+    receiver_currency: String,
+    sender_amount: Number,
+    receiver_amount: Number,
     exchange_rate: Number
   },
   { collection: "transactions" }

@@ -65,25 +65,25 @@ export default {
   getAccountBalanceArr(transactionHistoryList, userId) {
     // Sort history by currency
     let accountBalances = new Array(Const.CURRENCY_ARR.length);
+
     Const.CURRENCY_ARR.forEach((currency, idx) => {
       let balance = 0;
       transactionHistoryList.forEach(history => {
         const {
-          amount,
           sender_id,
+          sender_currency,
+          sender_amount,
           receiver_id,
-          target_currency,
-          source_currency
+          receiver_currency,
+          receiver_amount
         } = history;
 
-        const isReceiving =
-          userId === receiver_id && currency === target_currency;
-        const isSending = userId === sender_id && currency === source_currency;
-
-        if (isReceiving) {
-          balance += amount;
-        } else if (isSending) {
-          balance -= amount;
+        if (userId === receiver_id && currency === receiver_currency) {
+          // 1. Receiver
+          balance += receiver_amount;
+        } else if (userId === sender_id && currency === sender_currency) {
+          // 2. Sender
+          balance -= sender_amount;
         }
       });
       return (accountBalances[idx] = balance);

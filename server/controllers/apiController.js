@@ -88,7 +88,7 @@ module.exports = function(app) {
       Users.findByIdAndUpdate(req.body.id, data, function(err, todo) {
         if (err) throw err;
 
-        res.send("Success");
+        res.send({ success: true });
       });
     } else {
       var newUser = Users(data);
@@ -99,11 +99,12 @@ module.exports = function(app) {
         var data = {
           sender_id: "passbase",
           sender_name: "passbase",
+          sender_currency: Const.CURRENCY.USD,
+          sender_amount: 1000,
           receiver_id: newUser.id,
           receiver_name: newUser.name,
-          source_currency: Const.CURRENCY.USD,
-          target_currency: Const.CURRENCY.USD,
-          amount: 1000,
+          receiver_currency: Const.CURRENCY.USD,
+          receiver_amount: 1000,
           exchange_rate: 1
         };
         addTransaction(
@@ -119,7 +120,7 @@ module.exports = function(app) {
   app.delete("/api/user", function(req, res) {
     Users.findByIdAndRemove(req.body.id, function(err) {
       if (err) throw err;
-      res.send("Success");
+      res.send({ success: true });
     });
   });
 
@@ -152,26 +153,27 @@ module.exports = function(app) {
     var newTransaction = Transactions(data);
     newTransaction.save(function(err) {
       if (err) throw err;
-      !!payload ? res.send(payload) : res.send("Success");
+      !!payload ? res.send(payload) : res.send({ success: true });
     });
   }
 
   app.post("/api/transaction", function(req, res) {
     var data = {
-      sender_id: req.body.sender,
+      sender_id: req.body.sender_id,
       sender_name: req.body.sender_name,
-      receiver_id: req.body.receiver,
+      sender_currency: req.body.sender_currency,
+      sender_amount: req.body.sender_amount,
+      receiver_id: req.body.receiver_id,
       receiver_name: req.body.receiver_name,
-      source_currency: req.body.source_currency,
-      target_currency: req.body.target_currency,
-      amount: req.body.amount,
+      receiver_currency: req.body.receiver_currency,
+      receiver_amount: req.body.receiver_amount,
       exchange_rate: req.body.exchange_rate
     };
 
     if (req.body.id) {
       Transactions.findByIdAndUpdate(req.body.id, data, function(err, todo) {
         if (err) throw err;
-        res.send("Success");
+        res.send({ success: true });
       });
     } else {
       addTransaction(req, res, data);
@@ -181,7 +183,7 @@ module.exports = function(app) {
   app.delete("/api/transaction", function(req, res) {
     Transactions.findByIdAndRemove(req.body.id, function(err) {
       if (err) throw err;
-      res.send("Success");
+      res.send({ success: true });
     });
   });
 };

@@ -3,12 +3,12 @@
   padding: 10px 10px;
 }
 
-.source-currency-box {
+.sender-currency-box {
   width: 200px;
   padding: 10px 10px;
 }
 
-.target-currency-box {
+.receiver-currency-box {
   width: 200px;
   padding: 10px 10px;
 }

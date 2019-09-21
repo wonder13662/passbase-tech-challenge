@@ -1,14 +1,15 @@
 import React from "react";
 import axios from "axios";
 import { Redirect, Link } from "react-router-dom";
+import Decimal from "decimal.js-light";
+import Select from "react-select";
+import Button from "react-bootstrap/Button";
+
 import utils from "../utils";
 import Const from "../const";
 import CurrencyRateTable from "./CurrencyRateTable";
 import BalanceTable from "./BalanceTable";
-import Select from "react-select";
 import "./Transaction.css";
-import Button from "react-bootstrap/Button";
-import Decimal from "decimal.js-light";
 
 class Transaction extends React.Component {
   constructor(props) {
@@ -16,17 +17,20 @@ class Transaction extends React.Component {
     const userId = sessionStorage.getItem("userid");
     this.state = {
       userId,
+      curUser: {},
       isLoggedIn: !!userId,
-      userList: [],
       userOptionList: [],
       currencyRateMap: {},
       selectedReceiverList: [],
       accountBalanceArr: [],
       transactionHistoryList: [],
-      sourceCurrency: { value: Const.CURRENCY.USD, label: Const.CURRENCY.USD },
-      sourceAmount: 0,
-      targetCurrency: { value: Const.CURRENCY.USD, label: Const.CURRENCY.USD },
-      targetAmount: 0
+      senderCurrency: { value: Const.CURRENCY.USD, label: Const.CURRENCY.USD },
+      senderAmount: 0,
+      receiverCurrency: {
+        value: Const.CURRENCY.USD,
+        label: Const.CURRENCY.USD
+      },
+      receiverAmount: 0
     };
 
     this.handleOnLogOut = this.handleOnLogOut.bind(this);
@@ -37,24 +41,41 @@ class Transaction extends React.Component {
     this.isEnableSubmitWithoutAlert = this.isEnableSubmitWithoutAlert.bind(
       this
     );
-    this.calculateTargetAmount = this.calculateTargetAmount.bind(this);
+    this.calculateReceiverAmount = this.calculateReceiverAmount.bind(this);
     this.getAccountBalance = this.getAccountBalance.bind(this);
+    this.fetchUserList = this.fetchUserList.bind(this);
+    this.fetchTransactionList = this.fetchTransactionList.bind(this);
   }
 
   componentDidMount() {
     // 1. fetch user list
+    this.fetchUserList();
+
+    // 2. fetch transaction list
+    this.fetchTransactionList();
+
+    // 3. fetch the currency rate
+    utils.fetchCurrencyRateMap().then(currencyRateMap => {
+      this.setState({ currencyRateMap });
+    });
+  }
+
+  fetchUserList() {
     axios
       .get(`http://localhost:3001/api/user/list`)
       .then(response => {
         if (!!response.data && response.data.length > 0) {
-          const options = response.data
+          const userList = response.data;
+          const options = userList
             .filter(user => user.id !== this.state.userId)
             .map(user => {
               return { value: user.id, label: user.name };
             });
 
+          const curUser = userList.find(user => user.id === this.state.userId);
+
           this.setState({
-            userList: response.data,
+            curUser,
             userOptionList: options,
             selectedReceiverList: options.slice(0, 1)
           });
@@ -63,8 +84,9 @@ class Transaction extends React.Component {
       .catch(error => {
         utils.alertError();
       });
+  }
 
-    // 1. fetch transaction list
+  fetchTransactionList() {
     axios
       .get(`http://localhost:3001/api/transaction/list/${this.state.userId}`)
       .then(response => {
@@ -84,11 +106,6 @@ class Transaction extends React.Component {
       .catch(error => {
         utils.alertError();
       });
-
-    // 2. fetch the currency rate
-    utils.fetchCurrencyRateMap().then(currencyRateMap => {
-      this.setState({ currencyRateMap });
-    });
   }
 
   handleOnLogOut(e) {
@@ -96,27 +113,74 @@ class Transaction extends React.Component {
   }
 
   handleOnSubmit(e) {
-    this.isEnableSubmitWithAlert();
+    if (!this.isEnableSubmitWithAlert()) return;
+
+    const {
+      selectedReceiverList,
+      curUser,
+      senderCurrency,
+      senderAmount,
+      receiverCurrency,
+      receiverAmount
+    } = this.state;
+
+    selectedReceiverList.forEach(receiver => {
+      const transactionData = {
+        sender_id: curUser.id,
+        sender_name: curUser.name,
+        sender_currency: senderCurrency.value,
+        sender_amount: senderAmount,
+        receiver_id: receiver.value,
+        receiver_name: receiver.label,
+        receiver_currency: receiverCurrency.value,
+        receiver_amount: receiverAmount,
+        exchange_rate: this.getCurrencyRate()
+      };
+
+      axios
+        .post(`http://localhost:3001/api/transaction`, transactionData)
+        .then(response => {
+          if (response.status !== 200 || !response.data.success) {
+            utils.alertError();
+          } else {
+            alert("Your money has been wired successfully!");
+            this.fetchTransactionList();
+            this.setState({ senderAmount: 0, receiverAmount: 0 });
+          }
+        })
+        .catch(error => {
+          utils.alertError();
+        });
+    });
   }
 
   getCurrencyRate() {
-    const sourceCurrency = this.state.sourceCurrency.value;
-    const targetCurrency = this.state.targetCurrency.value;
+    const senderCurrency = this.state.senderCurrency.value;
+    const receiverCurrency = this.state.receiverCurrency.value;
     const currencyRateMap = this.state.currencyRateMap;
 
     if (
-      sourceCurrency === targetCurrency ||
+      senderCurrency === receiverCurrency ||
       !currencyRateMap ||
-      !currencyRateMap[sourceCurrency]
+      !currencyRateMap[senderCurrency]
     )
       return 1;
 
-    return currencyRateMap[sourceCurrency][targetCurrency];
+    return currencyRateMap[senderCurrency][receiverCurrency];
   }
 
   getAccountBalance() {
-    const { accountBalanceArr, sourceCurrency } = this.state;
-    const idx = Const.CURRENCY_ARR.indexOf(sourceCurrency.value);
+    const { accountBalanceArr, senderCurrency } = this.state;
+    if (
+      !accountBalanceArr ||
+      accountBalanceArr.length < 1 ||
+      !senderCurrency ||
+      !senderCurrency.value
+    ) {
+      return 0;
+    }
+
+    const idx = Const.CURRENCY_ARR.indexOf(senderCurrency.value);
     return new Decimal(accountBalanceArr[idx]);
   }
 
@@ -131,11 +195,11 @@ class Transaction extends React.Component {
   isEnableSubmit(isShowingAlert) {
     const {
       accountBalanceArr,
-      sourceAmount,
-      sourceCurrency,
+      senderAmount,
+      senderCurrency,
       selectedReceiverList
     } = this.state;
-    const idx = Const.CURRENCY_ARR.indexOf(sourceCurrency.value);
+    const idx = Const.CURRENCY_ARR.indexOf(senderCurrency.value);
     const curAccountBalance = accountBalanceArr[idx];
 
     if (selectedReceiverList.length < 1) {
@@ -144,15 +208,15 @@ class Transaction extends React.Component {
       return false;
     }
 
-    const totalSourceAmount = sourceAmount * selectedReceiverList.length;
-    if (totalSourceAmount > curAccountBalance) {
+    const totalSenderAmount = senderAmount * selectedReceiverList.length;
+    if (totalSenderAmount > curAccountBalance) {
       // 1. Transit amount should be lower or equal to balance amount
       if (!!isShowingAlert)
         alert("Amount should be equal or less than balance amount");
       return false;
     }
 
-    if (totalSourceAmount <= 0) {
+    if (totalSenderAmount <= 0) {
       // 2. Transit amount should be bigger than 0
       if (!!isShowingAlert) alert("Amount should be bigger than 0");
       return false;
@@ -161,44 +225,44 @@ class Transaction extends React.Component {
     return true;
   }
 
-  calculateTargetAmount(sourceAmount) {
+  calculateReceiverAmount(senderAmount) {
     const {
-      sourceCurrency,
-      targetCurrency,
+      senderCurrency,
+      receiverCurrency,
       selectedReceiverList,
       currencyRateMap
     } = this.state;
 
-    if (sourceCurrency.value === targetCurrency.value) {
-      return sourceAmount;
+    if (senderCurrency.value === receiverCurrency.value) {
+      return senderAmount;
     }
 
-    const totalSourceAmount = sourceAmount * selectedReceiverList.length;
-    const rate = currencyRateMap[sourceCurrency.value][targetCurrency.value];
-    const targetAmount = totalSourceAmount * rate;
+    const totalSenderAmount = senderAmount * selectedReceiverList.length;
+    const rate = currencyRateMap[senderCurrency.value][receiverCurrency.value];
+    const receiverAmount = totalSenderAmount * rate;
 
-    return targetAmount;
+    return receiverAmount;
   }
 
-  calculateSourceAmount(targetAmount) {
+  calculateSenderAmount(receiverAmount) {
     const {
-      sourceCurrency,
-      targetCurrency,
+      senderCurrency,
+      receiverCurrency,
       selectedReceiverList,
       currencyRateMap
     } = this.state;
 
-    if (sourceCurrency.value === targetCurrency.value) {
-      return targetAmount;
+    if (senderCurrency.value === receiverCurrency.value) {
+      return receiverAmount;
     }
 
-    const totalTargetAmount = new Decimal(targetAmount).times(
+    const totalReceiverAmount = new Decimal(receiverAmount).times(
       selectedReceiverList.length
     );
-    const rate = currencyRateMap[sourceCurrency.value][targetCurrency.value];
-    const sourceAmount = totalTargetAmount.dividedBy(rate);
+    const rate = currencyRateMap[senderCurrency.value][receiverCurrency.value];
+    const senderAmount = totalReceiverAmount.dividedBy(rate);
 
-    return sourceAmount;
+    return senderAmount;
   }
 
   render() {
@@ -206,9 +270,7 @@ class Transaction extends React.Component {
       return <Redirect to="/" />;
     }
 
-    const { userList, userOptionList } = this.state;
-
-    const curUser = userList.find(user => user.id === this.state.userId);
+    const { userOptionList, curUser } = this.state;
 
     const currencyOptions = Const.CURRENCY_ARR.map(currency => {
       return { value: currency, label: currency };
@@ -245,30 +307,30 @@ class Transaction extends React.Component {
             options={userOptionList}
           />
         </div>
-        <div className="source-currency-box">
+        <div className="sender-currency-box">
           <Select
-            value={this.state.sourceCurrency}
+            value={this.state.senderCurrency}
             isSearchable={true}
             onChange={value => {
-              this.setState({ sourceCurrency: value });
+              this.setState({ senderCurrency: value });
             }}
             options={currencyOptions}
           />
           <input
-            value={this.state.sourceAmount}
+            value={this.state.senderAmount}
             onChange={e => {
               const safeNum =
                 e.target.value === ""
                   ? new Decimal(0)
                   : new Decimal(e.target.value);
               const accountBalance = this.getAccountBalance();
-              const sourceAmount = accountBalance.lessThan(safeNum)
+              const senderAmount = accountBalance.lessThan(safeNum)
                 ? accountBalance
                 : safeNum;
-              const targetAmount = this.calculateTargetAmount(sourceAmount);
+              const receiverAmount = this.calculateReceiverAmount(senderAmount);
               this.setState({
-                sourceAmount: sourceAmount.toString(),
-                targetAmount: targetAmount.toString()
+                senderAmount: senderAmount.toString(),
+                receiverAmount: receiverAmount.toString()
               });
             }}
           />
@@ -276,34 +338,34 @@ class Transaction extends React.Component {
 
         <div className="currency-rate-box">{this.getCurrencyRate()}</div>
 
-        <div className="target-currency-box">
+        <div className="receiver-currency-box">
           <Select
-            value={this.state.targetCurrency}
+            value={this.state.receiverCurrency}
             isSearchable={true}
             onChange={value => {
-              this.setState({ targetCurrency: value });
+              this.setState({ receiverCurrency: value });
             }}
             options={currencyOptions}
           />
           <input
-            value={this.state.targetAmount}
+            value={this.state.receiverAmount}
             onChange={e => {
               const safeNum =
                 e.target.value === ""
                   ? new Decimal(0)
                   : new Decimal(e.target.value);
               const accountBalance = this.getAccountBalance();
-              const maxTargetAmount = accountBalance.times(
+              const maxReceiverAmount = accountBalance.times(
                 this.getCurrencyRate()
               );
-              const targetAmount = safeNum.lessThan(maxTargetAmount)
+              const receiverAmount = safeNum.lessThan(maxReceiverAmount)
                 ? safeNum
-                : maxTargetAmount;
-              const sourceAmount = this.calculateSourceAmount(targetAmount);
+                : maxReceiverAmount;
+              const senderAmount = this.calculateSenderAmount(receiverAmount);
 
               this.setState({
-                sourceAmount: sourceAmount.toString(),
-                targetAmount: targetAmount.toString()
+                senderAmount: senderAmount.toString(),
+                receiverAmount: receiverAmount.toString()
               });
             }}
           />

@@ -53,11 +53,12 @@ class Overview extends React.Component {
       <tr key={item._id}>
         <td>{idx}</td>
         <td>{item.sender_name}</td>
-        <td>{item.receiver_name}</td>
-        <td>{item.amount}</td>
-        <td>{item.source_currency}</td>
-        <td>{item.target_currency}</td>
+        <td>{item.sender_currency}</td>
+        <td>{item.sender_amount}</td>
         <td>{item.exchange_rate}</td>
+        <td>{item.receiver_name}</td>
+        <td>{item.receiver_currency}</td>
+        <td>{item.receiver_amount}</td>
         <td>{item.created_at}</td>
       </tr>
     ));
@@ -84,11 +85,12 @@ class Overview extends React.Component {
               <tr>
                 <th>Id</th>
                 <th>Sender</th>
-                <th>Receiver</th>
-                <th>Amount</th>
-                <th>Source currency</th>
-                <th>Target currency</th>
+                <th>Sender currency</th>
+                <th>Sender Amount</th>
                 <th>Exchange rate</th>
+                <th>Receiver</th>
+                <th>Receiver currency</th>
+                <th>Receiver Amount</th>
                 <th>Created at</th>
               </tr>
             </thead>

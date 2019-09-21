@@ -11,10 +11,13 @@ class CurrencyRateTable extends React.Component {
       currencyRateArr: [],
       selectedReceiverList: [],
       currencies: [Const.CURRENCY.USD, Const.CURRENCY.EUR, Const.CURRENCY.GBP],
-      sourceCurrency: { value: Const.CURRENCY.USD, label: Const.CURRENCY.USD },
-      sourceAmount: 0,
-      targetCurrency: { value: Const.CURRENCY.USD, label: Const.CURRENCY.USD },
-      targetAmount: 0
+      senderCurrency: { value: Const.CURRENCY.USD, label: Const.CURRENCY.USD },
+      senderAmount: 0,
+      receiverCurrency: {
+        value: Const.CURRENCY.USD,
+        label: Const.CURRENCY.USD
+      },
+      receiverAmount: 0
     };
   }
 
