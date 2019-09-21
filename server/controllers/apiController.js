@@ -188,6 +188,22 @@ module.exports = function(app) {
     addTransaction(req, res, data);
   });
 
+  app.post("/api/transaction/fail", function(req, res) {
+    var data = {
+      sender_id: req.body.sender_id,
+      sender_name: req.body.sender_name,
+      sender_currency: req.body.sender_currency,
+      sender_amount: req.body.sender_amount,
+      receiver_id: req.body.receiver_id,
+      receiver_name: req.body.receiver_name,
+      receiver_currency: req.body.receiver_currency,
+      receiver_amount: req.body.receiver_amount,
+      exchange_rate: req.body.exchange_rate,
+      success: false
+    };
+    addTransaction(req, res, data);
+  });
+
   app.delete("/api/transaction", function(req, res) {
     Transactions.findByIdAndRemove(req.body.id, function(err) {
       if (err) throw err;

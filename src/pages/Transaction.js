@@ -37,6 +37,9 @@ class Transaction extends React.Component {
     this.handleOnLogOut = this.handleOnLogOut.bind(this);
     this.getCurrencyRate = this.getCurrencyRate.bind(this);
     this.handleOnSubmit = this.handleOnSubmit.bind(this);
+    this.handleOnSubmitThenTestFail = this.handleOnSubmitThenTestFail.bind(
+      this
+    );
     this.isEnableSubmit = this.isEnableSubmit.bind(this);
     this.isEnableSubmitWithAlert = this.isEnableSubmitWithAlert.bind(this);
     this.isEnableSubmitWithoutAlert = this.isEnableSubmitWithoutAlert.bind(
@@ -117,7 +120,7 @@ class Transaction extends React.Component {
     sessionStorage.removeItem("userid");
   }
 
-  handleOnSubmit(e) {
+  addTransaction(url) {
     if (!this.isEnableSubmitWithAlert()) return;
 
     const {
@@ -143,10 +146,7 @@ class Transaction extends React.Component {
         exchange_rate: this.getCurrencyRate()
       };
 
-      const promise = axios.post(
-        `http://localhost:3001/api/transaction`,
-        transactionData
-      );
+      const promise = axios.post(url, transactionData);
       promises.push(promise);
     });
 
@@ -170,6 +170,14 @@ class Transaction extends React.Component {
       .catch(error => {
         utils.alertError();
       });
+  }
+
+  handleOnSubmit(e) {
+    this.addTransaction("http://localhost:3001/api/transaction");
+  }
+
+  handleOnSubmitThenTestFail(e) {
+    this.addTransaction("http://localhost:3001/api/transaction/fail");
   }
 
   getCurrencyRate() {
@@ -412,7 +420,7 @@ class Transaction extends React.Component {
                 </td>
               </tr>
               <tr>
-                <td colSpan="4">
+                <td colSpan="2">
                   {this.isEnableSubmit(false) ? (
                     <Button
                       variant="primary"
@@ -432,13 +440,33 @@ class Transaction extends React.Component {
                     </Button>
                   )}
                 </td>
+                <td colSpan="2">
+                  {this.isEnableSubmit(false) ? (
+                    <Button
+                      variant="danger"
+                      onClick={this.handleOnSubmitThenTestFail}
+                      size="lg"
+                    >
+                      Test transaction failure
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="danger"
+                      onClick={this.handleOnSubmitThenTestFail}
+                      size="lg"
+                      disabled
+                    >
+                      Test transaction failure
+                    </Button>
+                  )}
+                </td>
               </tr>
             </tbody>
           </Table>
         </div>
       </div>
     );
-  }
+  } //
 }
 
 export default Transaction;
