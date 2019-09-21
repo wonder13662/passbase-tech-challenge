@@ -44,8 +44,6 @@ class Overview extends React.Component {
 
     Promise.all([promiseUSD, promiseEUR, promiseGBP])
       .then(responses => {
-        console.log(responses);
-
         const currencyRates = [
           {
             base: Const.CURRENCY.USD,
@@ -87,8 +85,6 @@ class Overview extends React.Component {
             ]
           }
         ];
-
-        console.log("currencyRates:", currencyRates);
 
         this.setState({ currencyRates });
       })

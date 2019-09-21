@@ -22,7 +22,6 @@ class SignUp extends React.Component {
 
   handleOnSubmit(e) {
     e.preventDefault();
-    console.log("handleOnSubmit at SignUp");
 
     if (!this.state.name) {
       alert("Please check name");

@@ -28,8 +28,6 @@ class LogIn extends React.Component {
 
   handleOnSubmit(e) {
     e.preventDefault();
-    console.log("handleOnSubmit at Login");
-
     if (!this.state.email) {
       alert("Please check email");
       return;

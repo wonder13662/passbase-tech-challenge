@@ -26,8 +26,6 @@ module.exports = function(app) {
   });
 
   app.post("/api/login", function(req, res) {
-    console.log("req.body.password:", req.body.password);
-
     // 1. Fetch the user by email
     Users.findOne(
       {
