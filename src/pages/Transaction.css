@@ -4,18 +4,15 @@
 }
 
 .sender-currency-box {
-  width: 200px;
+  width: 1028px;
   padding: 10px 10px;
 }
 
-.receiver-currency-box {
-  width: 200px;
-  padding: 10px 10px;
+.sender-currency-box > table > tbody > tr > td {
+  width: 25%;
 }
-
-.currency-rate-table-container {
-  width: 400px;
-  padding: 10px 10px;
+.sender-currency-box > table > tbody > tr > td > button {
+  width: 200px;
 }
 
 .info-box-r {

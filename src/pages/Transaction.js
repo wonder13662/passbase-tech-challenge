@@ -3,6 +3,7 @@ import axios from "axios";
 import { Redirect, Link } from "react-router-dom";
 import Decimal from "decimal.js-light";
 import Select from "react-select";
+import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 
 import utils from "../utils";
@@ -124,6 +125,7 @@ class Transaction extends React.Component {
       receiverAmount
     } = this.state;
 
+    let promises = [];
     selectedReceiverList.forEach(receiver => {
       const transactionData = {
         sender_id: curUser.id,
@@ -137,21 +139,35 @@ class Transaction extends React.Component {
         exchange_rate: this.getCurrencyRate()
       };
 
-      axios
-        .post(`http://localhost:3001/api/transaction`, transactionData)
-        .then(response => {
-          if (response.status !== 200 || !response.data.success) {
-            utils.alertError();
-          } else {
-            alert("Your money has been wired successfully!");
-            this.fetchTransactionList();
-            this.setState({ senderAmount: 0, receiverAmount: 0 });
-          }
-        })
-        .catch(error => {
-          utils.alertError();
-        });
+      const promise = axios.post(
+        `http://localhost:3001/api/transaction`,
+        transactionData
+      );
+      promises.push(promise);
     });
+
+    Promise.all(promises)
+      .then(responses => {
+        console.log("responses:", responses);
+
+        let success = true;
+        responses.forEach(res => {
+          if (res.status !== 200 || !res.data.success) {
+            success = false;
+          }
+        });
+
+        if (!success) {
+          utils.alertError();
+        } else {
+          this.fetchTransactionList();
+          this.setState({ senderAmount: 0, receiverAmount: 0 });
+          alert("Your money has been wired successfully!");
+        }
+      })
+      .catch(error => {
+        utils.alertError();
+      });
   }
 
   getCurrencyRate() {
@@ -226,43 +242,25 @@ class Transaction extends React.Component {
   }
 
   calculateReceiverAmount(senderAmount) {
-    const {
-      senderCurrency,
-      receiverCurrency,
-      selectedReceiverList,
-      currencyRateMap
-    } = this.state;
+    const { senderCurrency, receiverCurrency, currencyRateMap } = this.state;
 
     if (senderCurrency.value === receiverCurrency.value) {
       return senderAmount;
     }
 
-    const totalSenderAmount = senderAmount * selectedReceiverList.length;
     const rate = currencyRateMap[senderCurrency.value][receiverCurrency.value];
-    const receiverAmount = totalSenderAmount * rate;
-
-    return receiverAmount;
+    return new Decimal(senderAmount).times(rate);
   }
 
   calculateSenderAmount(receiverAmount) {
-    const {
-      senderCurrency,
-      receiverCurrency,
-      selectedReceiverList,
-      currencyRateMap
-    } = this.state;
+    const { senderCurrency, receiverCurrency, currencyRateMap } = this.state;
 
     if (senderCurrency.value === receiverCurrency.value) {
       return receiverAmount;
     }
 
-    const totalReceiverAmount = new Decimal(receiverAmount).times(
-      selectedReceiverList.length
-    );
     const rate = currencyRateMap[senderCurrency.value][receiverCurrency.value];
-    const senderAmount = totalReceiverAmount.dividedBy(rate);
-
-    return senderAmount;
+    return new Decimal(receiverAmount).dividedBy(rate);
   }
 
   render() {
@@ -270,11 +268,19 @@ class Transaction extends React.Component {
       return <Redirect to="/" />;
     }
 
-    const { userOptionList, curUser } = this.state;
+    const {
+      userOptionList,
+      selectedReceiverList,
+      curUser,
+      senderAmount,
+      receiverAmount
+    } = this.state;
 
     const currencyOptions = Const.CURRENCY_ARR.map(currency => {
       return { value: currency, label: currency };
     });
+
+    const receiverCnt = selectedReceiverList.length;
 
     return (
       <div>
@@ -307,78 +313,127 @@ class Transaction extends React.Component {
             options={userOptionList}
           />
         </div>
+
         <div className="sender-currency-box">
-          <Select
-            value={this.state.senderCurrency}
-            isSearchable={true}
-            onChange={value => {
-              this.setState({ senderCurrency: value });
-            }}
-            options={currencyOptions}
-          />
-          <input
-            value={this.state.senderAmount}
-            onChange={e => {
-              const safeNum =
-                e.target.value === ""
-                  ? new Decimal(0)
-                  : new Decimal(e.target.value);
-              const accountBalance = this.getAccountBalance();
-              const senderAmount = accountBalance.lessThan(safeNum)
-                ? accountBalance
-                : safeNum;
-              const receiverAmount = this.calculateReceiverAmount(senderAmount);
-              this.setState({
-                senderAmount: senderAmount.toString(),
-                receiverAmount: receiverAmount.toString()
-              });
-            }}
-          />
+          <Table striped bordered>
+            <thead>
+              <tr>
+                <th>Currency</th>
+                <th>Amount</th>
+                <th>Receiver number</th>
+                <th>Total amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <Select
+                    value={this.state.senderCurrency}
+                    isSearchable={true}
+                    onChange={value => {
+                      this.setState({ senderCurrency: value });
+                    }}
+                    options={currencyOptions}
+                  />
+                </td>
+                <td>
+                  <input
+                    value={senderAmount}
+                    onChange={e => {
+                      const safeNum =
+                        e.target.value === ""
+                          ? new Decimal(0)
+                          : new Decimal(e.target.value);
+                      const accountBalance = this.getAccountBalance();
+                      const senderAmount = accountBalance.lessThan(safeNum)
+                        ? accountBalance
+                        : safeNum;
+                      const receiverAmount = this.calculateReceiverAmount(
+                        senderAmount
+                      );
+                      this.setState({
+                        senderAmount: senderAmount.toString(),
+                        receiverAmount: receiverAmount.toString()
+                      });
+                    }}
+                  />
+                </td>
+                <td>{`X ${receiverCnt} =`}</td>
+                <td>
+                  <input value={senderAmount * receiverCnt} disabled />
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="2">Currency Rate</td>
+                <td colSpan="2">{this.getCurrencyRate()}</td>
+              </tr>
+              <tr>
+                <td>
+                  <Select
+                    value={this.state.receiverCurrency}
+                    isSearchable={true}
+                    onChange={value => {
+                      this.setState({ receiverCurrency: value });
+                    }}
+                    options={currencyOptions}
+                  />{" "}
+                </td>
+                <td>
+                  <input
+                    value={this.state.receiverAmount}
+                    onChange={e => {
+                      const safeNum =
+                        e.target.value === ""
+                          ? new Decimal(0)
+                          : new Decimal(e.target.value);
+                      const accountBalance = this.getAccountBalance();
+                      const maxReceiverAmount = accountBalance.times(
+                        this.getCurrencyRate()
+                      );
+                      const receiverAmount = safeNum.lessThan(maxReceiverAmount)
+                        ? safeNum
+                        : maxReceiverAmount;
+                      const senderAmount = this.calculateSenderAmount(
+                        receiverAmount
+                      );
+
+                      this.setState({
+                        senderAmount: senderAmount.toString(),
+                        receiverAmount: receiverAmount.toString()
+                      });
+                    }}
+                  />
+                </td>
+                <td>{`X ${receiverCnt} =`}</td>
+                <td>
+                  <input value={receiverAmount * receiverCnt} disabled />
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="4">
+                  {this.isEnableSubmit(false) ? (
+                    <Button
+                      variant="primary"
+                      onClick={this.handleOnSubmit}
+                      size="lg"
+                    >
+                      Send
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      onClick={this.handleOnSubmit}
+                      size="lg"
+                      disabled
+                    >
+                      Send
+                    </Button>
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </Table>
         </div>
-
-        <div className="currency-rate-box">{this.getCurrencyRate()}</div>
-
-        <div className="receiver-currency-box">
-          <Select
-            value={this.state.receiverCurrency}
-            isSearchable={true}
-            onChange={value => {
-              this.setState({ receiverCurrency: value });
-            }}
-            options={currencyOptions}
-          />
-          <input
-            value={this.state.receiverAmount}
-            onChange={e => {
-              const safeNum =
-                e.target.value === ""
-                  ? new Decimal(0)
-                  : new Decimal(e.target.value);
-              const accountBalance = this.getAccountBalance();
-              const maxReceiverAmount = accountBalance.times(
-                this.getCurrencyRate()
-              );
-              const receiverAmount = safeNum.lessThan(maxReceiverAmount)
-                ? safeNum
-                : maxReceiverAmount;
-              const senderAmount = this.calculateSenderAmount(receiverAmount);
-
-              this.setState({
-                senderAmount: senderAmount.toString(),
-                receiverAmount: receiverAmount.toString()
-              });
-            }}
-          />
-        </div>
-        {this.isEnableSubmit(false) ? (
-          <Button variant="primary" onClick={this.handleOnSubmit}>
-            Send
-          </Button>
-        ) : (
-          <Button variant="primary" onClick={this.handleOnSubmit} disabled>
-            Send
-          </Button>
-        )}
       </div>
     );
   }
