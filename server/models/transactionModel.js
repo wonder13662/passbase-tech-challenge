@@ -5,8 +5,10 @@ var Schema = mongoose.Schema;
 
 var transactionSchema = new Schema(
   {
-    sender: String,
-    receiver: String,
+    sender_id: String,
+    sender_name: String,
+    receiver_id: String,
+    receiver_name: String,
     source_currency: String,
     target_currency: String,
     amount: Number,

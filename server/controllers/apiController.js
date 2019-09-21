@@ -101,7 +101,12 @@ module.exports = function(app) {
   // Transaction
   app.get("/api/transaction/list/:userid", function(req, res) {
     Transactions.find(
-      { $or: [{ receiver: req.params.userid }, { sender: req.params.userid }] },
+      {
+        $or: [
+          { receiver_id: req.params.userid },
+          { sender_id: req.params.userid }
+        ]
+      },
       function(err, transactions) {
         if (err) throw err;
 
