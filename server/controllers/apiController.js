@@ -8,12 +8,39 @@ module.exports = function(app) {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
+  function filterUser(user) {
+    return {
+      created_at: user.created_at,
+      email_address: user.email_address,
+      name: user.name,
+      updated_at: user.updated_at,
+      _id: user._id,
+      id: user._id
+    };
+  }
+
   // Users
+  app.get("/api/user/list", function(req, res) {
+    Users.find({}, function(err, users) {
+      if (err) throw err;
+
+      res.send(
+        users.map(user => {
+          return filterUser(user);
+        })
+      );
+    });
+  });
+
   app.get("/api/user/list/:username", function(req, res) {
     Users.find({ name: req.params.username }, function(err, users) {
       if (err) throw err;
 
-      res.send(users);
+      res.send(
+        users.map(user => {
+          return filterUser(user);
+        })
+      );
     });
   });
 
@@ -21,7 +48,7 @@ module.exports = function(app) {
     Users.findById({ _id: req.params.id }, function(err, user) {
       if (err) throw err;
 
-      res.send(user);
+      res.send(filterUser(user));
     });
   });
 

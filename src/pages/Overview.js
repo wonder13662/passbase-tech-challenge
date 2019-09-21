@@ -3,7 +3,6 @@ import axios from "axios";
 import utils from "../utils";
 import Const from "../const";
 import "./Overview.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { Redirect, Link } from "react-router-dom";
 import Table from "react-bootstrap/Table";
 
@@ -51,8 +50,6 @@ class Overview extends React.Component {
             });
             accountBalances[idx] = balance;
           });
-
-          console.log("accountBalances:", accountBalances); // REMOVE ME
 
           this.setState({
             isSignedUp: true,
@@ -172,7 +169,7 @@ class Overview extends React.Component {
         </Link>
         <div className="currency-rate-table-container">
           <h3>Currency rate</h3>
-          <Table striped bordered hover>
+          <Table striped bordered hover size="sm">
             <thead>
               <tr>
                 <th>Base</th>
@@ -187,7 +184,7 @@ class Overview extends React.Component {
         </div>
         <div className="balance-table-container">
           <h3>Balances</h3>
-          <Table striped bordered hover>
+          <Table striped bordered hover size="sm">
             <thead>
               <tr>
                 <th>Base</th>
@@ -199,7 +196,7 @@ class Overview extends React.Component {
         </div>
         <div className="transaction-table-container">
           <h3>Transaction history</h3>
-          <Table striped bordered hover>
+          <Table striped bordered hover size="sm">
             <thead>
               <tr>
                 <th>Id</th>

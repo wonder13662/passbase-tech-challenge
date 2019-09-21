@@ -23,3 +23,11 @@ $ npm run start
 ```
 http://localhost:3000
 ```
+
+## Live curreny rate API included
+
+```
+https://api.ratesapi.io/api/latest?base=USD
+https://api.ratesapi.io/api/latest?base=EUR
+https://api.ratesapi.io/api/latest?base=GBP
+```
