@@ -1,8 +1,8 @@
-const Users = require("../models/userModel");
-const Transactions = require("../models/transactionModel");
-const bodyParser = require("body-parser");
-const bcrypt = require("bcryptjs");
-const Const = require("../../src/const");
+var Users = require("../models/userModel");
+var Transactions = require("../models/transactionModel");
+var bodyParser = require("body-parser");
+var bcrypt = require("bcryptjs");
+var Const = require("../../src/const");
 
 module.exports = function(app) {
   app.use(bodyParser.json());
@@ -37,10 +37,7 @@ module.exports = function(app) {
         if (err) throw err;
 
         // 2. Compare password by bcryptjs
-        const isIdentical = bcrypt.compareSync(
-          req.body.password,
-          user.password
-        );
+        var isIdentical = bcrypt.compareSync(req.body.password, user.password);
 
         res.send(Object.assign({}, { success: isIdentical, userid: user.id }));
       }
@@ -48,7 +45,7 @@ module.exports = function(app) {
   });
 
   app.post("/api/user", function(req, res) {
-    const data = {
+    var data = {
       name: req.body.name,
       email_address: req.body.email_address,
       password: req.body.password
@@ -61,12 +58,12 @@ module.exports = function(app) {
         res.send("Success");
       });
     } else {
-      const newUser = Users(data);
+      var newUser = Users(data);
       newUser.save(function(err) {
         if (err) throw err;
 
         // Add 1000 USD Transaction
-        const data = {
+        var data = {
           sender: "",
           receiver: newUser.id,
           source_currency: Const.CURRENCY.USD,
@@ -117,7 +114,7 @@ module.exports = function(app) {
   }
 
   app.post("/api/transaction", function(req, res) {
-    const data = {
+    var data = {
       sender: req.body.sender,
       receiver: req.body.receiver,
       source_currency: req.body.source_currency,
@@ -131,7 +128,7 @@ module.exports = function(app) {
     if (req.body.id) {
       addTransaction(data);
     } else {
-      const newTransaction = Transactions(data);
+      var newTransaction = Transactions(data);
       newTransaction.save(function(err) {
         if (err) throw err;
         res.send("Success");

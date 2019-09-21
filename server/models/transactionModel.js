@@ -1,4 +1,5 @@
 var mongoose = require("mongoose");
+var timestamps = require("mongoose-timestamp");
 
 var Schema = mongoose.Schema;
 
@@ -9,12 +10,14 @@ var transactionSchema = new Schema(
     source_currency: String,
     target_currency: String,
     amount: Number,
-    exchange_rate: Number,
-    created_at: String,
-    updated_at: String
+    exchange_rate: Number
   },
   { collection: "transactions" }
 );
+transactionSchema.plugin(timestamps, {
+  createdAt: "created_at",
+  updatedAt: "updated_at"
+});
 
 var Transactions = mongoose.model("Transactions", transactionSchema);
 
