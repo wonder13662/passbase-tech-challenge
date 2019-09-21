@@ -148,8 +148,6 @@ class Transaction extends React.Component {
 
     Promise.all(promises)
       .then(responses => {
-        console.log("responses:", responses);
-
         let success = true;
         responses.forEach(res => {
           if (res.status !== 200 || !res.data.success) {

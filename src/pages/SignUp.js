@@ -42,7 +42,6 @@ class SignUp extends React.Component {
         password: utils.encryptStr(this.state.password)
       })
       .then(response => {
-        console.log("response:", response);
         if (response.status === 200 && response.data.success) {
           alert("Your account has been successfully registerd!");
           sessionStorage.setItem("userid", response.data.userid);
