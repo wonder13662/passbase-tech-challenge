@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 import utils from "../utils";
-import { Link } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 
 class SignUp extends React.Component {
   constructor(props) {
@@ -10,7 +10,8 @@ class SignUp extends React.Component {
     this.state = {
       name: "",
       email: "",
-      password: ""
+      password: "",
+      isSignedUp: false
     };
 
     this.handleOnChangeName = this.handleOnChangeName.bind(this);
@@ -42,15 +43,16 @@ class SignUp extends React.Component {
         email_address: this.state.email,
         password: utils.encryptStr(this.state.password)
       })
-      .then(function(response) {
+      .then(response => {
         console.log(response);
         if (response.status === 200) {
           alert("Your account has been successfully registerd!");
+          this.setState({ isSignedUp: true });
         } else {
           utils.alertError();
         }
       })
-      .catch(function(error) {
+      .catch(error => {
         console.log(error);
         utils.alertError();
       });
@@ -69,6 +71,10 @@ class SignUp extends React.Component {
   }
 
   render() {
+    if (this.state.isSignedUp) {
+      return <Redirect to="/overview" />;
+    }
+
     return (
       <form action="/api/signup" method="post">
         <div>
