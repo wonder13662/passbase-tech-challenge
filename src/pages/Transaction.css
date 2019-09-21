@@ -2,3 +2,22 @@
   width: 400px;
   padding: 10px 10px;
 }
+
+.source-currency-box {
+  width: 200px;
+  padding: 10px 10px;
+}
+
+.target-currency-box {
+  width: 200px;
+  padding: 10px 10px;
+}
+
+.currency-rate-table-container {
+  width: 400px;
+  padding: 10px 10px;
+}
+
+.info-box-r {
+  float: right;
+}
