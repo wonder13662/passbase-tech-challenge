@@ -61,5 +61,34 @@ export default {
       .catch(error => {
         this.alertError();
       });
+  },
+  getAccountBalanceArr(transactionHistoryList, userId) {
+    // Sort history by currency
+    let accountBalances = new Array(Const.CURRENCY_ARR.length);
+    Const.CURRENCY_ARR.forEach((currency, idx) => {
+      let balance = 0;
+      transactionHistoryList.forEach(history => {
+        const {
+          amount,
+          sender_id,
+          receiver_id,
+          target_currency,
+          source_currency
+        } = history;
+
+        const isReceiving =
+          userId === receiver_id && currency === target_currency;
+        const isSending = userId === sender_id && currency === source_currency;
+
+        if (isReceiving) {
+          balance += amount;
+        } else if (isSending) {
+          balance -= amount;
+        }
+      });
+      return (accountBalances[idx] = balance);
+    });
+
+    return accountBalances;
   }
 };

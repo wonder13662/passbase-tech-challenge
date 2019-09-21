@@ -7,6 +7,8 @@ import CurrencyRateTable from "./CurrencyRateTable";
 import BalanceTable from "./BalanceTable";
 import Select from "react-select";
 import "./Transaction.css";
+import Button from "react-bootstrap/Button";
+import Decimal from "decimal.js-light";
 
 class Transaction extends React.Component {
   constructor(props) {
@@ -16,8 +18,10 @@ class Transaction extends React.Component {
       userId,
       isLoggedIn: !!userId,
       userList: [],
+      userOptionList: [],
       currencyRateMap: {},
       selectedReceiverList: [],
+      accountBalanceArr: [],
       transactionHistoryList: [],
       sourceCurrency: { value: Const.CURRENCY.USD, label: Const.CURRENCY.USD },
       sourceAmount: 0,
@@ -27,6 +31,14 @@ class Transaction extends React.Component {
 
     this.handleOnLogOut = this.handleOnLogOut.bind(this);
     this.getCurrencyRate = this.getCurrencyRate.bind(this);
+    this.handleOnSubmit = this.handleOnSubmit.bind(this);
+    this.isEnableSubmit = this.isEnableSubmit.bind(this);
+    this.isEnableSubmitWithAlert = this.isEnableSubmitWithAlert.bind(this);
+    this.isEnableSubmitWithoutAlert = this.isEnableSubmitWithoutAlert.bind(
+      this
+    );
+    this.calculateTargetAmount = this.calculateTargetAmount.bind(this);
+    this.getAccountBalance = this.getAccountBalance.bind(this);
   }
 
   componentDidMount() {
@@ -34,10 +46,17 @@ class Transaction extends React.Component {
     axios
       .get(`http://localhost:3001/api/user/list`)
       .then(response => {
-        console.log("response:", response); // REMOVE ME
         if (!!response.data && response.data.length > 0) {
+          const options = response.data
+            .filter(user => user.id !== this.state.userId)
+            .map(user => {
+              return { value: user.id, label: user.name };
+            });
+
           this.setState({
-            userList: response.data
+            userList: response.data,
+            userOptionList: options,
+            selectedReceiverList: options.slice(0, 1)
           });
         }
       })
@@ -50,7 +69,12 @@ class Transaction extends React.Component {
       .get(`http://localhost:3001/api/transaction/list/${this.state.userId}`)
       .then(response => {
         if (response.status === 200 && !!response.data) {
+          const accountBalanceArr = utils.getAccountBalanceArr(
+            response.data,
+            this.state.userId
+          );
           this.setState({
+            accountBalanceArr,
             transactionHistoryList: response.data
           });
         } else {
@@ -71,6 +95,10 @@ class Transaction extends React.Component {
     sessionStorage.removeItem("userid");
   }
 
+  handleOnSubmit(e) {
+    this.isEnableSubmitWithAlert();
+  }
+
   getCurrencyRate() {
     const sourceCurrency = this.state.sourceCurrency.value;
     const targetCurrency = this.state.targetCurrency.value;
@@ -86,20 +114,101 @@ class Transaction extends React.Component {
     return currencyRateMap[sourceCurrency][targetCurrency];
   }
 
+  getAccountBalance() {
+    const { accountBalanceArr, sourceCurrency } = this.state;
+    const idx = Const.CURRENCY_ARR.indexOf(sourceCurrency.value);
+    return new Decimal(accountBalanceArr[idx]);
+  }
+
+  isEnableSubmitWithAlert() {
+    return this.isEnableSubmit(false);
+  }
+
+  isEnableSubmitWithoutAlert() {
+    return this.isEnableSubmit(false);
+  }
+
+  isEnableSubmit(isShowingAlert) {
+    const {
+      accountBalanceArr,
+      sourceAmount,
+      sourceCurrency,
+      selectedReceiverList
+    } = this.state;
+    const idx = Const.CURRENCY_ARR.indexOf(sourceCurrency.value);
+    const curAccountBalance = accountBalanceArr[idx];
+
+    if (selectedReceiverList.length < 1) {
+      // 3. Receiver should be assinged
+      if (!!isShowingAlert) alert("No one receive your money");
+      return false;
+    }
+
+    const totalSourceAmount = sourceAmount * selectedReceiverList.length;
+    if (totalSourceAmount > curAccountBalance) {
+      // 1. Transit amount should be lower or equal to balance amount
+      if (!!isShowingAlert)
+        alert("Amount should be equal or less than balance amount");
+      return false;
+    }
+
+    if (totalSourceAmount <= 0) {
+      // 2. Transit amount should be bigger than 0
+      if (!!isShowingAlert) alert("Amount should be bigger than 0");
+      return false;
+    }
+
+    return true;
+  }
+
+  calculateTargetAmount(sourceAmount) {
+    const {
+      sourceCurrency,
+      targetCurrency,
+      selectedReceiverList,
+      currencyRateMap
+    } = this.state;
+
+    if (sourceCurrency.value === targetCurrency.value) {
+      return sourceAmount;
+    }
+
+    const totalSourceAmount = sourceAmount * selectedReceiverList.length;
+    const rate = currencyRateMap[sourceCurrency.value][targetCurrency.value];
+    const targetAmount = totalSourceAmount * rate;
+
+    return targetAmount;
+  }
+
+  calculateSourceAmount(targetAmount) {
+    const {
+      sourceCurrency,
+      targetCurrency,
+      selectedReceiverList,
+      currencyRateMap
+    } = this.state;
+
+    if (sourceCurrency.value === targetCurrency.value) {
+      return targetAmount;
+    }
+
+    const totalTargetAmount = new Decimal(targetAmount).times(
+      selectedReceiverList.length
+    );
+    const rate = currencyRateMap[sourceCurrency.value][targetCurrency.value];
+    const sourceAmount = totalTargetAmount.dividedBy(rate);
+
+    return sourceAmount;
+  }
+
   render() {
     if (!this.state.isLoggedIn) {
       return <Redirect to="/" />;
     }
 
-    const curUser = this.state.userList.find(
-      user => user.id === this.state.userId
-    );
+    const { userList, userOptionList } = this.state;
 
-    const options = this.state.userList
-      .filter(user => user.id !== this.state.userId)
-      .map(user => {
-        return { value: user.id, label: user.name };
-      });
+    const curUser = userList.find(user => user.id === this.state.userId);
 
     const currencyOptions = Const.CURRENCY_ARR.map(currency => {
       return { value: currency, label: currency };
@@ -133,7 +242,7 @@ class Transaction extends React.Component {
             onChange={value => {
               this.setState({ selectedReceiverList: !value ? [] : value });
             }}
-            options={options}
+            options={userOptionList}
           />
         </div>
         <div className="source-currency-box">
@@ -148,7 +257,19 @@ class Transaction extends React.Component {
           <input
             value={this.state.sourceAmount}
             onChange={e => {
-              this.setState({ sourceAmount: e.target.value });
+              const safeNum =
+                e.target.value === ""
+                  ? new Decimal(0)
+                  : new Decimal(e.target.value);
+              const accountBalance = this.getAccountBalance();
+              const sourceAmount = accountBalance.lessThan(safeNum)
+                ? accountBalance
+                : safeNum;
+              const targetAmount = this.calculateTargetAmount(sourceAmount);
+              this.setState({
+                sourceAmount: sourceAmount.toString(),
+                targetAmount: targetAmount.toString()
+              });
             }}
           />
         </div>
@@ -167,10 +288,35 @@ class Transaction extends React.Component {
           <input
             value={this.state.targetAmount}
             onChange={e => {
-              this.setState({ targetAmount: e.target.value });
+              const safeNum =
+                e.target.value === ""
+                  ? new Decimal(0)
+                  : new Decimal(e.target.value);
+              const accountBalance = this.getAccountBalance();
+              const maxTargetAmount = accountBalance.times(
+                this.getCurrencyRate()
+              );
+              const targetAmount = safeNum.lessThan(maxTargetAmount)
+                ? safeNum
+                : maxTargetAmount;
+              const sourceAmount = this.calculateSourceAmount(targetAmount);
+
+              this.setState({
+                sourceAmount: sourceAmount.toString(),
+                targetAmount: targetAmount.toString()
+              });
             }}
           />
         </div>
+        {this.isEnableSubmit(false) ? (
+          <Button variant="primary" onClick={this.handleOnSubmit}>
+            Send
+          </Button>
+        ) : (
+          <Button variant="primary" onClick={this.handleOnSubmit} disabled>
+            Send
+          </Button>
+        )}
       </div>
     );
   }
