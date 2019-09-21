@@ -7,7 +7,7 @@ module.exports = function(app) {
   app.use(bodyParser.urlencoded({ extended: true }));
 
   // Users
-  app.get("/api/users/:username", function(req, res) {
+  app.get("/api/user/list/:username", function(req, res) {
     Users.find({ name: req.params.username }, function(err, users) {
       if (err) throw err;
 
@@ -53,7 +53,7 @@ module.exports = function(app) {
   });
 
   // Transaction
-  app.get("/api/transactions/:userid", function(req, res) {
+  app.get("/api/transaction/list/:userid", function(req, res) {
     Transactions.find({ sender: req.params.userid }, function(
       err,
       transactions
