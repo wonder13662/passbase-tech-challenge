@@ -68,13 +68,10 @@ module.exports = function(app) {
           receiver: newUser.id,
           source_currency: Const.CURRENCY.USD,
           target_currency: Const.CURRENCY.USD,
-          amount: req.body.amount,
-          exchange_rate: req.body.exchange_rate,
-          created_at: req.body.created_at,
-          updated_at: req.body.updated_at
+          amount: 1000,
+          exchange_rate: req.body.exchange_rate
         };
-
-        res.send("Success");
+        addTransaction(req, res, data);
       });
     }
   });
@@ -88,14 +85,14 @@ module.exports = function(app) {
 
   // Transaction
   app.get("/api/transaction/list/:userid", function(req, res) {
-    Transactions.find({ sender: req.params.userid }, function(
-      err,
-      transactions
-    ) {
-      if (err) throw err;
+    Transactions.find(
+      { $or: [{ receiver: req.params.userid }, { sender: req.params.userid }] },
+      function(err, transactions) {
+        if (err) throw err;
 
-      res.send(transactions);
-    });
+        res.send(transactions);
+      }
+    );
   });
 
   app.get("/api/transaction/:id", function(req, res) {
@@ -107,7 +104,8 @@ module.exports = function(app) {
   });
 
   function addTransaction(req, res, data) {
-    Transactions.findByIdAndUpdate(req.body.id, data, function(err, todo) {
+    var newTransaction = Transactions(data);
+    newTransaction.save(function(err) {
       if (err) throw err;
       res.send("Success");
     });
@@ -120,19 +118,16 @@ module.exports = function(app) {
       source_currency: req.body.source_currency,
       target_currency: req.body.target_currency,
       amount: req.body.amount,
-      exchange_rate: req.body.exchange_rate,
-      created_at: req.body.created_at,
-      updated_at: req.body.updated_at
+      exchange_rate: req.body.exchange_rate
     };
 
     if (req.body.id) {
-      addTransaction(data);
-    } else {
-      var newTransaction = Transactions(data);
-      newTransaction.save(function(err) {
+      Transactions.findByIdAndUpdate(req.body.id, data, function(err, todo) {
         if (err) throw err;
         res.send("Success");
       });
+    } else {
+      addTransaction(req, res, data);
     }
   });
 
