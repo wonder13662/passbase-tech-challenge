@@ -77,44 +77,47 @@ module.exports = function(app) {
     );
   });
 
-  app.post("/api/user", function(req, res) {
+  app.post("/api/signup", function(req, res) {
     var data = {
       name: req.body.name,
       email_address: req.body.email_address,
       password: req.body.password
     };
 
-    if (req.body.id) {
-      Users.findByIdAndUpdate(req.body.id, data, function(err, todo) {
+    Users.findOne(
+      {
+        email_address: req.body.email_address
+      },
+      function(err, user) {
         if (err) throw err;
 
-        res.send({ success: true });
-      });
-    } else {
-      var newUser = Users(data);
-      newUser.save(function(err) {
-        if (err) throw err;
+        if (!!user) {
+          res.send({
+            success: false,
+            reason: "Unfortunately this email has been registred already"
+          });
+        } else {
+          var newUser = Users(data);
+          newUser.save(function(err) {
+            if (err) throw err;
 
-        // Add 1000 USD Transaction
-        var data = {
-          sender_id: "passbase",
-          sender_name: "passbase",
-          sender_currency: Const.CURRENCY.USD,
-          sender_amount: 1000,
-          receiver_id: newUser.id,
-          receiver_name: newUser.name,
-          receiver_currency: Const.CURRENCY.USD,
-          receiver_amount: 1000,
-          exchange_rate: 1
-        };
-        addTransaction(
-          req,
-          res,
-          data,
-          Object.assign({}, { userid: newUser.id })
-        );
-      });
-    }
+            // Add 1000 USD Transaction
+            var data = {
+              sender_id: "passbase",
+              sender_name: "passbase",
+              sender_currency: Const.CURRENCY.USD,
+              sender_amount: 1000,
+              receiver_id: newUser.id,
+              receiver_name: newUser.name,
+              receiver_currency: Const.CURRENCY.USD,
+              receiver_amount: 1000,
+              exchange_rate: 1
+            };
+            addTransaction(req, res, data, { userid: newUser.id });
+          });
+        }
+      }
+    );
   });
 
   app.delete("/api/user", function(req, res) {

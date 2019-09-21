@@ -37,18 +37,23 @@ class SignUp extends React.Component {
     // TODO When it's duplicated
 
     axios
-      .post("http://localhost:3001/api/user", {
+      .post("http://localhost:3001/api/signup", {
         name: this.state.name,
         email_address: this.state.email,
         password: utils.encryptStr(this.state.password)
       })
       .then(response => {
-        if (response.status === 200) {
+        console.log("response:", response);
+        if (response.status === 200 && response.data.success) {
           alert("Your account has been successfully registerd!");
           sessionStorage.setItem("userid", response.data.userid);
           this.setState({ isSignedUp: true });
         } else {
-          utils.alertError();
+          if (!!response.data && !!response.data.reason) {
+            alert(response.data.reason);
+          } else {
+            utils.alertError();
+          }
         }
       })
       .catch(error => {
