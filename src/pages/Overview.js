@@ -8,7 +8,7 @@ class Overview extends React.Component {
   }
 
   handleOnLogOut(e) {
-    localStorage.removeItem("userid");
+    sessionStorage.removeItem("userid");
   }
 
   render() {
