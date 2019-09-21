@@ -77,7 +77,7 @@ module.exports = function(app) {
           source_currency: Const.CURRENCY.USD,
           target_currency: Const.CURRENCY.USD,
           amount: 1000,
-          exchange_rate: req.body.exchange_rate
+          exchange_rate: 1
         };
         addTransaction(
           req,

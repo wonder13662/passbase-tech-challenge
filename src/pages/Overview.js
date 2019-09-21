@@ -158,6 +158,7 @@ class Overview extends React.Component {
         <td>{item.amount}</td>
         <td>{item.source_currency}</td>
         <td>{item.target_currency}</td>
+        <td>{item.exchange_rate}</td>
         <td>{item.created_at}</td>
       </tr>
     ));
@@ -207,6 +208,7 @@ class Overview extends React.Component {
                 <th>Amount</th>
                 <th>Source currency</th>
                 <th>Target currency</th>
+                <th>Exchange rate</th>
                 <th>Created at</th>
               </tr>
             </thead>
