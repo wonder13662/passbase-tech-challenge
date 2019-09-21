@@ -71,7 +71,12 @@ module.exports = function(app) {
           amount: 1000,
           exchange_rate: req.body.exchange_rate
         };
-        addTransaction(req, res, data);
+        addTransaction(
+          req,
+          res,
+          data,
+          Object.assign({}, { userid: newUser.id })
+        );
       });
     }
   });
@@ -103,11 +108,11 @@ module.exports = function(app) {
     });
   });
 
-  function addTransaction(req, res, data) {
+  function addTransaction(req, res, data, payload) {
     var newTransaction = Transactions(data);
     newTransaction.save(function(err) {
       if (err) throw err;
-      res.send("Success");
+      !!payload ? res.send(payload) : res.send("Success");
     });
   }
 

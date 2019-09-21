@@ -44,16 +44,15 @@ class SignUp extends React.Component {
         password: utils.encryptStr(this.state.password)
       })
       .then(response => {
-        console.log(response);
         if (response.status === 200) {
           alert("Your account has been successfully registerd!");
+          localStorage.setItem("userid", response.data.userid);
           this.setState({ isSignedUp: true });
         } else {
           utils.alertError();
         }
       })
       .catch(error => {
-        console.log(error);
         utils.alertError();
       });
   }
