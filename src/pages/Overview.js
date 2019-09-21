@@ -10,11 +10,14 @@ import Table from "react-bootstrap/Table";
 class Overview extends React.Component {
   constructor(props) {
     super(props);
+    const userId = sessionStorage.getItem("userid");
     this.state = {
-      userId: sessionStorage.getItem("userid"),
-      isLoggedIn: !!sessionStorage.getItem("userid"),
+      userId: !!userId ? userId : "",
+      isLoggedIn: !!userId,
       transactionHistoryList: [],
-      currencyRates: []
+      currencies: [Const.CURRENCY.USD, Const.CURRENCY.EUR, Const.CURRENCY.GBP],
+      currencyRates: [],
+      accountBalances: []
     };
     this.handleOnLogOut = this.handleOnLogOut.bind(this);
   }
@@ -25,9 +28,36 @@ class Overview extends React.Component {
       .get(`http://localhost:3001/api/transaction/list/${this.state.userId}`)
       .then(response => {
         if (response.status === 200 && !!response.data) {
+          const transactionHistoryList = response.data;
+
+          // Sort history by currency
+          let accountBalances = new Array(this.state.currencies.length);
+          this.state.currencies.forEach((currency, idx) => {
+            // 1. Fetch all transaction which contains this currency
+            let balance = 0;
+            transactionHistoryList.forEach(history => {
+              const isReceiving =
+                this.state.userId === history.receiver_id &&
+                currency === history.target_currency;
+              const isSending =
+                this.state.userId === history.sender_id &&
+                currency === history.source_currency;
+
+              if (isReceiving) {
+                balance += history.amount;
+              } else if (isSending) {
+                balance -= history.amount;
+              }
+            });
+            accountBalances[idx] = balance;
+          });
+
+          console.log("accountBalances:", accountBalances); // REMOVE ME
+
           this.setState({
             isSignedUp: true,
-            transactionHistoryList: response.data
+            transactionHistoryList,
+            accountBalances
           });
         } else {
           utils.alertError();
@@ -102,6 +132,14 @@ class Overview extends React.Component {
       return <Redirect to="/" />;
     }
 
+    // 1. Calculate account balance
+    const balanceRows = this.state.currencies.map((currency, idx) => (
+      <tr key={idx}>
+        <td>{currency}</td>
+        <td>{this.state.accountBalances[idx]}</td>
+      </tr>
+    ));
+
     const currencyRateRows = this.state.currencyRates.map((item, idx) => (
       <tr key={idx}>
         <td>{item.base}</td>
@@ -132,6 +170,7 @@ class Overview extends React.Component {
           Log out
         </Link>
         <div className="currency-rate-table-container">
+          <h3>Currency rate</h3>
           <Table striped bordered hover>
             <thead>
               <tr>
@@ -145,7 +184,20 @@ class Overview extends React.Component {
             <tbody>{currencyRateRows}</tbody>
           </Table>
         </div>
+        <div className="balance-table-container">
+          <h3>Balances</h3>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Base</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody>{balanceRows}</tbody>
+          </Table>
+        </div>
         <div className="transaction-table-container">
+          <h3>Transaction history</h3>
           <Table striped bordered hover>
             <thead>
               <tr>
