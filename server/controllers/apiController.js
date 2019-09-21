@@ -36,10 +36,18 @@ module.exports = function(app) {
       function(err, user) {
         if (err) throw err;
 
-        // 2. Compare password by bcryptjs
-        var isIdentical = bcrypt.compareSync(req.body.password, user.password);
-
-        res.send(Object.assign({}, { success: isIdentical, userid: user.id }));
+        if (!user || !user.password) {
+          res.send(Object.assign({}, { success: false, userid: "" }));
+        } else {
+          // 2. Compare password by bcryptjs
+          var isIdentical = bcrypt.compareSync(
+            req.body.password,
+            user.password
+          );
+          res.send(
+            Object.assign({}, { success: isIdentical, userid: user.id })
+          );
+        }
       }
     );
   });
@@ -64,8 +72,10 @@ module.exports = function(app) {
 
         // Add 1000 USD Transaction
         var data = {
-          sender: "",
-          receiver: newUser.id,
+          sender_id: "passbase",
+          sender_name: "passbase",
+          receiver_id: newUser.id,
+          receiver_name: newUser.name,
           source_currency: Const.CURRENCY.USD,
           target_currency: Const.CURRENCY.USD,
           amount: 1000,
@@ -118,8 +128,10 @@ module.exports = function(app) {
 
   app.post("/api/transaction", function(req, res) {
     var data = {
-      sender: req.body.sender,
-      receiver: req.body.receiver,
+      sender_id: req.body.sender,
+      sender_name: req.body.sender_name,
+      receiver_id: req.body.receiver,
+      receiver_name: req.body.receiver_name,
       source_currency: req.body.source_currency,
       target_currency: req.body.target_currency,
       amount: req.body.amount,
