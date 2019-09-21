@@ -13,7 +13,8 @@ var transactionSchema = new Schema(
     receiver_currency: String,
     sender_amount: Number,
     receiver_amount: Number,
-    exchange_rate: Number
+    exchange_rate: Number,
+    success: Boolean
   },
   { collection: "transactions" }
 );

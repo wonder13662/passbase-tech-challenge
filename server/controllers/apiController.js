@@ -111,9 +111,13 @@ module.exports = function(app) {
               receiver_name: newUser.name,
               receiver_currency: Const.CURRENCY.USD,
               receiver_amount: 1000,
-              exchange_rate: 1
+              exchange_rate: 1,
+              success: true
             };
-            addTransaction(req, res, data, { userid: newUser.id });
+            addTransaction(req, res, data, {
+              userid: newUser.id,
+              success: true
+            });
           });
         }
       }
@@ -153,10 +157,18 @@ module.exports = function(app) {
   });
 
   function addTransaction(req, res, data, payload) {
+    // 실패 상황을 가정
+    var randomFailure = Math.random() * 9 + 1; // 1/10
+    if (2 < randomFailure && randomFailure < 6) {
+      data.success = false;
+      payload = Object.assign({}, payload, { success: data.success });
+    }
+
     var newTransaction = Transactions(data);
-    newTransaction.save(function(err) {
+
+    newTransaction.save(err => {
       if (err) throw err;
-      !!payload ? res.send(payload) : res.send({ success: true });
+      !!payload ? res.send(payload) : res.send({ success: data.success });
     });
   }
 
@@ -170,17 +182,10 @@ module.exports = function(app) {
       receiver_name: req.body.receiver_name,
       receiver_currency: req.body.receiver_currency,
       receiver_amount: req.body.receiver_amount,
-      exchange_rate: req.body.exchange_rate
+      exchange_rate: req.body.exchange_rate,
+      success: true
     };
-
-    if (req.body.id) {
-      Transactions.findByIdAndUpdate(req.body.id, data, function(err, todo) {
-        if (err) throw err;
-        res.send({ success: true });
-      });
-    } else {
-      addTransaction(req, res, data);
-    }
+    addTransaction(req, res, data);
   });
 
   app.delete("/api/transaction", function(req, res) {

@@ -193,7 +193,7 @@ class Transaction extends React.Component {
       !senderCurrency ||
       !senderCurrency.value
     ) {
-      return 0;
+      return new Decimal(0);
     }
 
     const idx = Const.CURRENCY_ARR.indexOf(senderCurrency.value);
@@ -245,7 +245,7 @@ class Transaction extends React.Component {
     const { senderCurrency, receiverCurrency, currencyRateMap } = this.state;
 
     if (senderCurrency.value === receiverCurrency.value) {
-      return senderAmount;
+      return new Decimal(senderAmount);
     }
 
     const rate = currencyRateMap[senderCurrency.value][receiverCurrency.value];
@@ -256,7 +256,7 @@ class Transaction extends React.Component {
     const { senderCurrency, receiverCurrency, currencyRateMap } = this.state;
 
     if (senderCurrency.value === receiverCurrency.value) {
-      return receiverAmount;
+      return new Decimal(receiverAmount);
     }
 
     const rate = currencyRateMap[senderCurrency.value][receiverCurrency.value];

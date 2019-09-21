@@ -50,7 +50,10 @@ class Overview extends React.Component {
     }
 
     const rows = this.state.transactionHistoryList.map((item, idx) => (
-      <tr key={item._id}>
+      <tr
+        key={item._id}
+        className={!item.success ? "row-fail-transaction" : ""}
+      >
         <td>{idx}</td>
         <td>{item.sender_name}</td>
         <td>{item.sender_currency}</td>
@@ -60,6 +63,7 @@ class Overview extends React.Component {
         <td>{item.receiver_currency}</td>
         <td>{item.receiver_amount}</td>
         <td>{item.created_at}</td>
+        <td>{`${item.success}`}</td>
       </tr>
     ));
 
@@ -92,6 +96,7 @@ class Overview extends React.Component {
                 <th>Receiver currency</th>
                 <th>Receiver Amount</th>
                 <th>Created at</th>
+                <th>Success</th>
               </tr>
             </thead>
             <tbody>{rows}</tbody>

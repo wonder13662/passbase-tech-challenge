@@ -16,3 +16,7 @@
 .info-box-r {
   float: right;
 }
+
+.row-fail-transaction {
+  color: red;
+}

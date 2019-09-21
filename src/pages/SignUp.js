@@ -35,8 +35,6 @@ class SignUp extends React.Component {
       return;
     }
 
-    // TODO When it's duplicated
-
     axios
       .post("http://localhost:3001/api/signup", {
         name: this.state.name,

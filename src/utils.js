@@ -75,13 +75,22 @@ export default {
           sender_amount,
           receiver_id,
           receiver_currency,
-          receiver_amount
+          receiver_amount,
+          success
         } = history;
 
-        if (userId === receiver_id && currency === receiver_currency) {
+        if (
+          userId === receiver_id &&
+          currency === receiver_currency &&
+          success
+        ) {
           // 1. Receiver
           balance += receiver_amount;
-        } else if (userId === sender_id && currency === sender_currency) {
+        } else if (
+          userId === sender_id &&
+          currency === sender_currency &&
+          success
+        ) {
           // 2. Sender
           balance -= sender_amount;
         }
