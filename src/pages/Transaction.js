@@ -49,6 +49,10 @@ class Transaction extends React.Component {
   }
 
   componentDidMount() {
+    if (!this.state.isLoggedIn) {
+      return;
+    }
+
     // 1. fetch user list
     this.fetchUserList();
 

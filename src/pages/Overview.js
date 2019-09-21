@@ -22,6 +22,10 @@ class Overview extends React.Component {
   }
 
   componentDidMount() {
+    if (!this.state.isLoggedIn) {
+      return;
+    }
+
     // 1. fetch transaction list
     axios
       .get(`http://localhost:3001/api/transaction/list/${this.state.userId}`)
