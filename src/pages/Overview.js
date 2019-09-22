@@ -78,17 +78,18 @@ class Overview extends React.Component {
         <Link to="/" onClick={this.handleOnLogOut}>
           Log out
         </Link>
-
-        <div className="info-box-r">
+        <div>
           <CurrencyRateTable />
-          <BalanceTable
-            transactionHistoryList={this.state.transactionHistoryList}
-          />
+          <div className="info-box-r">
+            <BalanceTable
+              transactionHistoryList={this.state.transactionHistoryList}
+            />
+          </div>
         </div>
 
         <div className="transaction-table-container">
           <h3>Transaction history</h3>
-          <Table striped bordered hover size="sm">
+          <Table striped bordered hover size="sm" data-cy="transaction-table">
             <thead>
               <tr>
                 <th>Id</th>

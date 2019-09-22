@@ -300,11 +300,13 @@ class Transaction extends React.Component {
           Log out
         </Link>
 
-        <div className="info-box-r">
+        <div>
           <CurrencyRateTable />
-          <BalanceTable
-            transactionHistoryList={this.state.transactionHistoryList}
-          />
+          <div className="info-box-r">
+            <BalanceTable
+              transactionHistoryList={this.state.transactionHistoryList}
+            />
+          </div>
         </div>
 
         {!!curUser ? (
@@ -312,7 +314,7 @@ class Transaction extends React.Component {
             <h3>{`${curUser.name}, You send`}</h3>
           </div>
         ) : null}
-        <div className="receiver-box">
+        <div className="receiver-box" data-cy="select-box-receiver">
           <Select
             value={this.state.selectedReceiverList}
             isMulti={true}
@@ -324,7 +326,7 @@ class Transaction extends React.Component {
           />
         </div>
 
-        <div className="sender-currency-box">
+        <div className="sender-currency-box" data-cy="sender-currency-box">
           <Table striped bordered>
             <thead>
               <tr>

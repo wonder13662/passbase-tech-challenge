@@ -29,7 +29,7 @@ class BalaceTable extends React.Component {
     return (
       <div className="balance-table-container">
         <h3>Balances</h3>
-        <Table striped bordered hover size="sm">
+        <Table striped bordered hover size="sm" data-cy="balance-table">
           <thead>
             <tr>
               <th>Base</th>

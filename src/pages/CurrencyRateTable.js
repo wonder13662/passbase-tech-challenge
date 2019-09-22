@@ -39,7 +39,7 @@ class CurrencyRateTable extends React.Component {
     return (
       <div className="currency-rate-table-container">
         <h3>Currency rate</h3>
-        <Table striped bordered hover size="sm">
+        <Table striped bordered hover size="sm" data-cy="currency-rate-table">
           <thead>
             <tr>
               <th>From</th>
