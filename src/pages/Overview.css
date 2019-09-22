@@ -9,12 +9,14 @@
 }
 
 .transaction-table-container {
-  width: 1200px;
+  width: 100%;
   padding: 10px 10px;
 }
 
 .info-box-r {
-  float: right;
+  position: absolute;
+  top: 48px;
+  left: 391px;
 }
 
 .row-fail-transaction {

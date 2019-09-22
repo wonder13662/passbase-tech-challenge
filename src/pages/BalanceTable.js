@@ -22,14 +22,16 @@ class BalaceTable extends React.Component {
     const balanceRows = Const.CURRENCY_ARR.map((currency, idx) => (
       <tr key={idx}>
         <td>{currency}</td>
-        <td>{accountBalances[idx]}</td>
+        <td data-cy={`balance-${currency.toLowerCase()}`}>
+          {accountBalances[idx]}
+        </td>
       </tr>
     ));
 
     return (
       <div className="balance-table-container">
         <h3>Balances</h3>
-        <Table striped bordered hover size="sm">
+        <Table striped bordered hover size="sm" data-cy="balance-table">
           <thead>
             <tr>
               <th>Base</th>

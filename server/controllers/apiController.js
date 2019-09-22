@@ -157,15 +157,7 @@ module.exports = function(app) {
   });
 
   function addTransaction(req, res, data, payload) {
-    // 실패 상황을 가정
-    var randomFailure = Math.random() * 9 + 1; // 1/10
-    if (2 < randomFailure && randomFailure < 6) {
-      data.success = false;
-      payload = Object.assign({}, payload, { success: data.success });
-    }
-
     var newTransaction = Transactions(data);
-
     newTransaction.save(err => {
       if (err) throw err;
       !!payload ? res.send(payload) : res.send({ success: data.success });

@@ -300,11 +300,13 @@ class Transaction extends React.Component {
           Log out
         </Link>
 
-        <div className="info-box-r">
+        <div>
           <CurrencyRateTable />
-          <BalanceTable
-            transactionHistoryList={this.state.transactionHistoryList}
-          />
+          <div className="info-box-r">
+            <BalanceTable
+              transactionHistoryList={this.state.transactionHistoryList}
+            />
+          </div>
         </div>
 
         {!!curUser ? (
@@ -312,7 +314,7 @@ class Transaction extends React.Component {
             <h3>{`${curUser.name}, You send`}</h3>
           </div>
         ) : null}
-        <div className="receiver-box">
+        <div className="receiver-box" data-cy="select-box-receiver">
           <Select
             value={this.state.selectedReceiverList}
             isMulti={true}
@@ -324,7 +326,7 @@ class Transaction extends React.Component {
           />
         </div>
 
-        <div className="sender-currency-box">
+        <div className="sender-currency-box" data-cy="sender-currency-box">
           <Table striped bordered>
             <thead>
               <tr>
@@ -336,7 +338,7 @@ class Transaction extends React.Component {
             </thead>
             <tbody>
               <tr>
-                <td>
+                <td data-cy="select-box-currency-sender">
                   <Select
                     value={this.state.senderCurrency}
                     isSearchable={true}
@@ -348,6 +350,7 @@ class Transaction extends React.Component {
                 </td>
                 <td>
                   <input
+                    data-cy="sender-amount-input"
                     value={senderAmount}
                     onChange={e => {
                       const safeNum =
@@ -370,7 +373,7 @@ class Transaction extends React.Component {
                 </td>
                 <td>{`X ${receiverCnt} =`}</td>
                 <td>
-                  <input value={senderAmount * receiverCnt} disabled />
+                  <input value={senderAmount * receiverCnt} disabled readOnly />
                 </td>
               </tr>
               <tr>
@@ -378,7 +381,7 @@ class Transaction extends React.Component {
                 <td colSpan="2">{this.getCurrencyRate()}</td>
               </tr>
               <tr>
-                <td>
+                <td data-cy="select-box-currency-receiver">
                   <Select
                     value={this.state.receiverCurrency}
                     isSearchable={true}
@@ -390,6 +393,7 @@ class Transaction extends React.Component {
                 </td>
                 <td>
                   <input
+                    data-cy="receiver-amount-input"
                     value={this.state.receiverAmount}
                     onChange={e => {
                       const safeNum =
@@ -416,7 +420,11 @@ class Transaction extends React.Component {
                 </td>
                 <td>{`X ${receiverCnt} =`}</td>
                 <td>
-                  <input value={receiverAmount * receiverCnt} disabled />
+                  <input
+                    value={receiverAmount * receiverCnt}
+                    disabled
+                    readOnly
+                  />
                 </td>
               </tr>
               <tr>
