@@ -31,3 +31,10 @@ https://api.ratesapi.io/api/latest?base=USD
 https://api.ratesapi.io/api/latest?base=EUR
 https://api.ratesapi.io/api/latest?base=GBP
 ```
+
+## Try End2End test - CypressIO
+
+```
+$ npm run cypress:open
+## Then run "webapp_test.js" in the Cypress console box
+```

@@ -22,7 +22,9 @@ class BalaceTable extends React.Component {
     const balanceRows = Const.CURRENCY_ARR.map((currency, idx) => (
       <tr key={idx}>
         <td>{currency}</td>
-        <td>{accountBalances[idx]}</td>
+        <td data-cy={`balance-${currency.toLowerCase()}`}>
+          {accountBalances[idx]}
+        </td>
       </tr>
     ));
 
